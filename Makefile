@@ -49,8 +49,8 @@ LD=$(CXX)
 
 COVROOT = ..
 
-include ../cli-base/mod.mk
-include ../ultimate-makefile/Makefile.ultimate
+include cli-base/mod.mk
+include ultimate-makefile/Makefile.ultimate
 
 Ast.cpp: Ast.h
 

@@ -1,0 +1,6 @@
+[submodule "ultimate-makefile"]
+	path = ultimate-makefile
+	url = http://github.com/tamasseller/ultimate-makefile
+[submodule "cli-base"]
+	path = cli-base
+	url = http://github.com/tamasseller/cli-base
