@@ -3,4 +3,4 @@
 .settings
 .gen
 .o
-rpc-tool
+roll-contract-tool

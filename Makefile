@@ -1,4 +1,4 @@
-OUTPUT = rpc-tool
+OUTPUT = roll-contract-tool
 DEPL_BIN += $(OUTPUT)
 
 OBJDIR = .o
@@ -27,6 +27,13 @@ GENDIR = .gen
 CLEAN_EXTRA += $(GENDIR)
 SOURCES += $(GENDIR)/rpcLexer.cpp $(GENDIR)/rpcParser.cpp
 
+$(abspath ast/ContractParser.cpp): $(abspath $(GENDIR)/rpcParser.h)
+
+$(abspath $(GENDIR)/%Lexer.cpp $(GENDIR)/%Parser.cpp \
+$(GENDIR)/%Lexer.h $(GENDIR)/%Parser.h): %.g4 $(MAKEFILE_LIST)
+	@printf "Antlr \e[1;32m$^ -> $@\e[0m\n"
+	@antlr4 -o $(GENDIR) $< -no-listener -no-visitor -Dlanguage=Cpp
+	
 LIBS += antlr4-runtime
 
 INCLUDE_DIRS += .
@@ -51,12 +58,3 @@ COVROOT = ..
 
 include cli-base/mod.mk
 include ultimate-makefile/Makefile.ultimate
-
-Ast.cpp: Ast.h
-
-Ast.h: $(GENDIR)/rpcParser.h $(GENDIR)/rpcLexer.h
-
-$(abspath $(GENDIR))/%Lexer.cpp $(abspath $(GENDIR))/%Parser.cpp \
-$(abspath $(GENDIR))/%Lexer.h $(abspath $(GENDIR))/%Parser.h: %.g4
-	@printf "\e[1;32mAntlr $^ -> $@\e[0m\n"
-	@antlr4 -o $(GENDIR) $^ -no-listener -no-visitor -Dlanguage=Cpp
