@@ -5,6 +5,6 @@
 
 #include <sstream>
 
-void writeContractTypes(std::stringstream &ss, const Contract& c);
+void writeParametricContractTypes(std::stringstream &ss, const Contract& c);
 
 #endif /* RPC_TOOL_GEN_CPP_CPPTYPEGEN_H_ */

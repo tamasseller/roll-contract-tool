@@ -8,22 +8,18 @@ struct StructTypeInfoGenerator
 {
 	static inline std::string serDesEntry(const std::string& name, const std::vector<std::string>& a, const int n)
 	{
+
 		std::stringstream ss;
-		ss << indent(n) << "template<> struct TypeInfo<" << name << ">: StructTypeInfo<" << name;
+		ss << indent(n) << "template<template<class> class Collection> struct TypeInfo<" << name << "<Collection>>: StructTypeInfo<" << std::endl;
+		ss << indent(n + 1) << name << "<Collection>";
 
-		if(a.size() > 1)
+		for(const auto& m: a)
 		{
-			for(const auto& m: a)
-			{
-				ss << "," << std::endl << indent(n + 1) << "StructMember<&" << name << "::" << m << ">";
-			}
+			ss << "," << std::endl << indent(n + 1) << "StructMember<&" << name << "<Collection>::" << m << ">";
+		}
 
-			ss << std::endl << indent(n) << "> {};";
-		}
-		else
-		{
-			ss << ", " << "StructMember<&" << name << "::" << a.front() << ">> {};";
-		}
+		ss << std::endl << indent(n) << "> {};";
+
 
 		return ss.str();
 	}
@@ -39,7 +35,7 @@ struct StructTypeInfoGenerator
 	static inline std::string handleTypeDef(const std::string& name, const T& t, const int n) { return {}; }
 
 	static inline std::string handleItem(const std::string& contractName, const Contract::Alias &a, const int n) {
-		return std::visit([name{contractTypeBlockNameRef(contractName) + "::" + userTypeName(a.name)}, n](const auto &t){ return handleTypeDef(name, t, n); }, a.type);
+		return std::visit([name{contractParametricBlockNameRef(contractName) + "::" + userTypeName(a.name)}, n](const auto &t){ return handleTypeDef(name, t, n); }, a.type);
 	}
 
 	template<class T> static inline void handleSessionItem(const T& t, std::vector<std::string> &fwd, std::vector<std::string> &bwd) {}
@@ -54,14 +50,17 @@ struct StructTypeInfoGenerator
 
 	static inline std::string handleItem(const std::string& contractName, const Contract::Session &s, const int n)
 	{
-		std::vector<std::string> fwd{"_close"}, bwd{"_close"};
+		std::vector<std::string> fwd, bwd;
 
 		for(const auto &i: s.items)
 		{
 			std::visit([&fwd, &bwd](const auto &t){ return handleSessionItem(t, fwd, bwd); }, i.second);
 		}
 
-		const auto baseName = contractTypeBlockNameRef(contractName) + "::" + sessionNamespaceName(s.name);
+		fwd.push_back("_close");
+		bwd.push_back("_close");
+
+		const auto baseName = contractParametricBlockNameRef(contractName) + "::" + sessionNamespaceName(s.name);
 		std::stringstream ss;
 
 		ss << serDesEntry(baseName + "::" + sessionCallExportTypeName(s.name), fwd, n) << std::endl << std::endl;

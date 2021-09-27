@@ -1,4 +1,4 @@
-#include "CppTypeGen.h"
+#include "CppParamTypeGen.h"
 
 #include "CppCommon.h"
 
@@ -7,11 +7,11 @@
 
 struct CommonTypeGenerator
 {
-	static inline std::string handleTypeRef(const std::string &n) { return userTypeName(n); }
+	static inline std::string handleTypeRef(const std::string &n) { return userTypeName(n) + "<Collection>"; }
 	static inline std::string handleTypeRef(const Contract::Primitive& p) { return cppPrimitive(p); }
 
 	static inline std::string handleTypeRef(const Contract::Collection &c) {
-		return "rpc::CollectionPlaceholder<" + std::visit([](const auto& e){return handleTypeRef(e);}, *c.elementType) + ">";
+		return "Collection<" + std::visit([](const auto& e){return handleTypeRef(e);}, *c.elementType) + ">";
 	}
 
 	static inline std::string handleTypeDef(const std::string& name, const Contract::Aggregate& a, const int n)
@@ -28,7 +28,7 @@ struct CommonTypeGenerator
 		}
 
 		std::stringstream ss;
-		writeBlock(ss, "struct " + userTypeName(name), result, n);
+		writeBlock(ss, "template<template<class> class Collection> struct " + userTypeName(name), result, n);
 		return ss.str();
 	}
 
@@ -36,7 +36,7 @@ struct CommonTypeGenerator
 	static inline std::string handleTypeDef(const std::string& name, const T& t, const int n)
 	{
 		std::stringstream ss;
-		ss << indent(n) << "using " << userTypeName(name) << " = " << handleTypeRef(t);
+		ss << indent(n) << "template<template<class> class Collection> using " << userTypeName(name) << " = " << handleTypeRef(t);
 		return ss.str();
 	}
 
@@ -58,7 +58,7 @@ struct CommonTypeGenerator
 	static inline std::string signature(const std::string &name, const decltype(toSignArgList({})) &args, const int n)
 	{
 		std::stringstream ss;
-		ss << indent(n) << "using " << name << " = rpc::Call";
+		ss << indent(n) << "template<template<class> class Collection> using " << name << " = rpc::Call";
 
 		if(args.size() > 1)
 		{
@@ -102,7 +102,7 @@ struct CommonTypeGenerator
 			std::string cbTypeName = callbackSignatureTypeName(f.name);
 			ss << signature(cbTypeName, {toSgnArg({"retval", *f.returnType, ""})}, n) << std::endl;
 			auto args = toSignArgList(f.args);
-			args.push_back({"callback", cbTypeName});
+			args.push_back({"callback", cbTypeName + "<Collection>"});
 			const auto type = functionSignatureTypeName(f.name);
 			ss << signature(type, args, n);
 		}
@@ -152,13 +152,13 @@ struct CommonTypeGenerator
 			bwdArgs.push_back(toSgnArg({"_retval", *c.returnType, ""}));
 		}
 
-		bwdArgs.push_back({"_exports", sessionCallExportTypeName(sName)});
+		bwdArgs.push_back({"_exports", sessionCallExportTypeName(sName) + "<Collection>"});
 
 		ss << signature(sessionAcceptSignatureTypeName(c.name), bwdArgs, n) << std::endl;
 
 		auto fwdArgs = toSignArgList(c.args);
-		fwdArgs.push_back({"_exports", sessionCallbackExportTypeName(sName)});
-		fwdArgs.push_back({"_accept", sessionAcceptSignatureTypeName(c.name)});
+		fwdArgs.push_back({"_exports", sessionCallbackExportTypeName(sName) + "<Collection>"});
+		fwdArgs.push_back({"_accept", sessionAcceptSignatureTypeName(c.name) + "<Collection>"});
 
 		ss << signature(sessionCreateSignatureTypeName(c.name), fwdArgs, n);
 
@@ -173,14 +173,14 @@ struct CommonTypeGenerator
 		std::vector<std::string> result;
 
 		std::transform(d.begin(), d.end(), std::back_inserter(result), [n](const auto &i){
-			return indent(n + 1) + i[1] + " " + i[0] + ";";
+			return indent(n + 1) + i[1] + "<Collection> " + i[0] + ";";
 		});
 
 		result.push_back(indent(n + 1) + "rpc::Call<> _close;");
 
 		std::stringstream ss;
 
-		if(writeBlock(ss, "struct " + name, result, n))
+		if(writeBlock(ss, "template<template<class> class Collection> struct " + name, result, n))
 		{
 			ss << ";";
 		}
@@ -212,7 +212,7 @@ struct CommonTypeGenerator
 	}
 };
 
-void writeContractTypes(std::stringstream &ss, const Contract& c)
+void writeParametricContractTypes(std::stringstream &ss, const Contract& c)
 {
 	std::vector<std::string> result;
 	for(const auto& i: c.items)
@@ -223,5 +223,5 @@ void writeContractTypes(std::stringstream &ss, const Contract& c)
 		result.push_back(ss.str());
 	}
 
-	writeTopLevelBlock(ss, printDocs(c.docs, 0) + "struct " + contractTypeBlockNameRef(c.name), result);
+	writeTopLevelBlock(ss, printDocs(c.docs, 0) + "struct " + contractParametricBlockNameRef(c.name), result);
 }

@@ -16,6 +16,7 @@ namespace detail
 	static constexpr auto symPrefix = "sym";
 	static constexpr auto callMemberPrefix = "id";
 	static constexpr auto contractNsSuffix = "Contract";
+	static constexpr auto parametricNsSuffix = "Parametric";
 	static constexpr auto typeNsSuffix = "Types";
 	static constexpr auto symNsSuffix = "Symbols";
 	static constexpr auto actSgnTypeSuffix = "Call";
@@ -89,6 +90,14 @@ static inline auto contractTypeBlockNameDef(const std::string& contractName) {
 
 static inline auto contractTypeBlockNameRef(const std::string& contractName) {
 	return contractRootBlockName(contractName) + "::" + contractTypeBlockNameDef(contractName);
+}
+
+static inline auto contractParametricBlockNameDef(const std::string& contractName) {
+	return detail::parametricNsSuffix;
+}
+
+static inline auto contractParametricBlockNameRef(const std::string& contractName) {
+	return contractRootBlockName(contractName) + "::" + contractParametricBlockNameDef(contractName);
 }
 
 static inline auto contractSymbolsBlockNameDef(const std::string& contractName) {
