@@ -150,11 +150,7 @@ struct MemberFunctionGenerator
 			const std::string& refRetType,
 			const int n
 	) {
-		if(args.size())
-		{
-			ss << indent(n) << templateArgList(args.size(), "class C");
-		}
-
+		ss << indent(n) << templateArgList(args.size(), "class C");
 		ss << indent(n) << "inline auto " << invocationMemberFunctionName(name) << functionArgList(args, "C&& _cb");
 		ss << indent(n) << "{" << std::endl;
 		ss << argCheckList(name, args, n + 1);
@@ -211,6 +207,7 @@ struct MemberFunctionGenerator
 			const auto cppRetType = std::visit([&cName](const auto& i) { return cppTypeRef(i, cName); }, f.returnType.value());
 			const auto refRetType = std::visit([&cName](const auto& i) { return refTypeRef(i); }, f.returnType.value());
 			writeCallbackCall(ss, f.name, argInfo, cppRetType, refRetType, n);
+
 			ss << std::endl << std::endl;
 			ss << printDocs(docs, n);
 			writeFutureCall(ss, f.name, argInfo, cppRetType, refRetType, n);
