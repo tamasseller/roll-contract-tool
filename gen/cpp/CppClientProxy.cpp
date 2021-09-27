@@ -117,7 +117,7 @@ struct MemberFunctionGenerator
 
 		for(auto i = 0u; i < args.size(); i++)
 		{
-			ss << ", " << "std::forward<A" << std::to_string(i) << ">(" << args[i][1] << ")";
+			ss << ", " << "rpc::forward<A" << std::to_string(i) << ">(" << args[i][1] << ")";
 		}
 
 		if(extra)
@@ -159,7 +159,7 @@ struct MemberFunctionGenerator
 		ss << indent(n) << "{" << std::endl;
 		ss << argCheckList(name, args, n + 1);
 		ss << argCheck("rpc::Arg<0, &C::operator()>", cppRetType, "Callback for " + name + " must take a first argument compatible with '" + refRetType + "'", n + 1);
-		ss << indent(n + 1) << "return this->callWithCallback(" << callMemberName(name) << ", std::move(_cb)" << invocationArgList(args) << ");" << std::endl;
+		ss << indent(n + 1) << "return this->callWithCallback(" << callMemberName(name) << ", rpc::move(_cb)" << invocationArgList(args) << ");" << std::endl;
 		ss << indent(n) << "}";
 	}
 
@@ -270,7 +270,7 @@ struct MemberFunctionGenerator
 
 		for(auto i = 0u; i < f.args.size(); i++)
 		{
-			ss << ", std::forward<A" << i << ">(" << f.args[i].name << ")";
+			ss << ", rpc::forward<A" << i << ">(" << f.args[i].name << ")";
 		}
 
 		ss << ");" << std::endl;
@@ -320,16 +320,16 @@ struct MemberFunctionGenerator
 			const auto refTypeName = std::visit([](const auto &i){return refTypeRef(i);}, f.returnType.value());
 			const auto msg = "Callback for " + defName + " must take an argument compatible with '" + refTypeName + "'";
 			ss << argCheck("rpc::Arg<0, &C::operator()>", cppTypeName, msg , n + 1);
-			ss << indent(n + 1) << "return this->createWithCallbackRetval(" << sym << ", _object, std::move(_cb)";
+			ss << indent(n + 1) << "return this->createWithCallbackRetval(" << sym << ", _object, rpc::move(_cb)";
 		}
 		else
 		{
-			ss << indent(n + 1) << "return this->createWithCallback(" << sym << ", _object, std::move(_cb)";
+			ss << indent(n + 1) << "return this->createWithCallback(" << sym << ", _object, rpc::move(_cb)";
 		}
 
 		for(auto i = 0u; i < f.args.size(); i++)
 		{
-			ss << ", std::forward<A" << i << ">(" << f.args[i].name << ")";
+			ss << ", rpc::forward<A" << i << ">(" << f.args[i].name << ")";
 		}
 
 		ss << ");" << std::endl;

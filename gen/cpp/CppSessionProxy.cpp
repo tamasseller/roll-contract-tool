@@ -149,7 +149,7 @@ std::string generateImportProxyMethod(const SessionProxyFilter& nGen, const Cont
 
 	for(auto i = 0u; i < a.args.size(); i++)
 	{
-		ss << ", std::forward<A" << std::to_string(i) << ">(" << argumentName(a.args[i].name) << ")";
+		ss << ", rpc::forward<A" << std::to_string(i) << ">(" << argumentName(a.args[i].name) << ")";
 	}
 
 	ss << ");" << std::endl;

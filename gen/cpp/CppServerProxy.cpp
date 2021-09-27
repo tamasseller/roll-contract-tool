@@ -95,7 +95,7 @@ namespace ServiceBuilderGenerator
 
 				if(!f->returnType.has_value())
 				{
-					ss << indent(n + 1) << "static_assert(rpc::hasCrtpBase<" << sObj << ", decltype(*std::declval<rpc::Ret<&Child::"
+					ss << indent(n + 1) << "static_assert(rpc::hasCrtpBase<" << sObj << ", decltype(*rpc::declval<rpc::Ret<&Child::"
 						<< defName << ">>())>, \"Session constructor " << f->name << " for " << s.name
 						<< " session must return a pointer-like object to a CRTP subclass of " << sObj << "\");" << std::endl;
 
@@ -107,8 +107,8 @@ namespace ServiceBuilderGenerator
 					const auto refTypeName = std::visit([](const auto &i){return refTypeRef(i);}, f->returnType.value());
 
 					ss << indent(n + 1) << "using RetType = typename rpc::Ret<&Child::" << f->name << ">;" << std::endl;
-					ss << indent(n + 1) << "static constexpr bool _retValOk = rpc::isCompatible<decltype(std::declval<RetType>().first), " << cppTypeName << ">();" << std::endl;
-					ss << indent(n + 1) << "static constexpr bool _objectOk = rpc::hasCrtpBase<" << sObj << ", decltype(*std::declval<RetType>().second)>;" << std::endl;
+					ss << indent(n + 1) << "static constexpr bool _retValOk = rpc::isCompatible<decltype(rpc::declval<RetType>().first), " << cppTypeName << ">();" << std::endl;
+					ss << indent(n + 1) << "static constexpr bool _objectOk = rpc::hasCrtpBase<" << sObj << ", decltype(*rpc::declval<RetType>().second)>;" << std::endl;
 					ss << indent(n + 1) << "static_assert(_retValOk && _objectOk, \"Session constructor "
 							<< f->name << " for " << s.name << " session must return a pair of a value compatible with " << refTypeName
 							<< " and pointer-like object to a CRTP subclass of "  << sObj << "\");" << std::endl;
@@ -131,7 +131,7 @@ namespace ServiceBuilderGenerator
 
 		const auto header = "template<class... Args>\n" +
 				indent(1) + name + "(Args&&... args):\n" +
-				indent(2) + name + "::ServiceBase(std::forward<Args>(args)...)";
+				indent(2) + name + "::ServiceBase(rpc::forward<Args>(args)...)";
 
 		for(const auto& i: c.items) {
 			std::visit([&blocks, &c](const auto i){handleItem(blocks, i, c.name, 2);}, i.second);
@@ -194,7 +194,7 @@ void writeServerProxy(std::stringstream& ss, const Contract& c)
 	{
 		ss << printDocs(c.docs, 0);
 
-		const auto header = "template<class Child, class Adapter>\nstruct " + contractServerProxyNameRef(c.name) + ": rpc::ServiceBase<Adapter>";
+		const auto header = "template<class Child, class Endpoint>\nstruct " + contractServerProxyNameRef(c.name) + ": rpc::ServiceBase<Endpoint>";
 
 		std::vector<std::string> result;
 		result.push_back(ctor);
