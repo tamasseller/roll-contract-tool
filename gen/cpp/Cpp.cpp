@@ -42,7 +42,7 @@ std::string CodeGenCpp::generate(const std::vector<Contract>& cs, const std::str
 	ss << "#include \"RpcSymbol.h\"" << std::endl;
 	ss << "#include \"RpcSession.h\"" << std::endl;
 
-	if(doClient)
+	if(doService)
 	{
 		ss << "#include \"RpcService.h\"" << std::endl;
 	}
@@ -52,14 +52,23 @@ std::string CodeGenCpp::generate(const std::vector<Contract>& cs, const std::str
 
 	for(const auto& c: cs)
 	{
-		writeTopLevelBlock(ss, "struct " + contractRootBlockName(c.name),
-		{
+		std::vector<std::string> members = {
 			indent(1) + "class Parametric;",
 			indent(1) + "class Types;",
 			indent(1) + "class Symbols;",
-			indent(1) + "template<class> class ClientProxy;",
-			indent(1) + "template<class, class> class ServerProxy;"
-		});
+		};
+
+		if(doClient)
+		{
+			members.push_back(indent(1) + "template<class> class ClientProxy;");
+		}
+
+		if(doService)
+		{
+			members.push_back(indent(1) + "template<class, class> class ServerProxy;");
+		}
+
+		writeTopLevelBlock(ss, "struct " + contractRootBlockName(c.name), std::move(members));
 
 		writeParametricContractTypes(ss, c);
 		writeStructTypeInfo(ss, c);

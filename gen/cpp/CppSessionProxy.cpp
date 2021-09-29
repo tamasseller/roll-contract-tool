@@ -187,7 +187,7 @@ void writeSessionProxies(std::stringstream& ss, const Contract& c, const Session
 
 			const auto exportCount = std::count_if(s->items.begin(), s->items.end(), [&nGen](const auto& i) {return nGen->asExport(i) != nullptr; });
 
-			hs << "class " << nGen->typeName() << ": public SessionBase<" << nGen->importedName() << ", " << nGen->exportedName() << ", " << exportCount << ">";
+			hs << "class " << nGen->typeName() << ": public rpc::SessionBase<" << nGen->importedName() << ", " << nGen->exportedName() << ", " << exportCount << ">";
 			writeTopLevelBlock(ss, hs.str(), result, true);
 		}
 	}
