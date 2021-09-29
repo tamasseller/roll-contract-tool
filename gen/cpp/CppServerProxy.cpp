@@ -106,12 +106,15 @@ namespace ServiceBuilderGenerator
 					const auto cppTypeName = std::visit([&cName](const auto &i){return cppTypeRef(i, cName);}, f->returnType.value());
 					const auto refTypeName = std::visit([](const auto &i){return refTypeRef(i);}, f->returnType.value());
 
-					ss << indent(n + 1) << "using RetType = typename rpc::Ret<&Child::" << f->name << ">;" << std::endl;
-					ss << indent(n + 1) << "static constexpr bool _retValOk = rpc::isCompatible<decltype(rpc::declval<RetType>().first), " << cppTypeName << ">();" << std::endl;
-					ss << indent(n + 1) << "static constexpr bool _objectOk = rpc::hasCrtpBase<" << sObj << ", decltype(*rpc::declval<RetType>().second)>;" << std::endl;
-					ss << indent(n + 1) << "static_assert(_retValOk && _objectOk, \"Session constructor "
-							<< f->name << " for " << s.name << " session must return a pair of a value compatible with " << refTypeName
-							<< " and pointer-like object to a CRTP subclass of "  << sObj << "\");" << std::endl;
+					const auto retType = "typename rpc::Ret<&Child::" + f->name + ">";
+					const auto retValCond = "rpc::isCompatible<decltype(rpc::declval<" + retType + ">().first), " + cppTypeName + ">()";
+					const auto objectCond = "rpc::hasCrtpBase<" + sObj + ", decltype(*rpc::declval<" + retType + ">().second)>";
+
+					ss << indent(n + 1) << "static_assert(" << retValCond << ", \"Session constructor " << f->name << " for " << s.name
+						<< " session must return a pair whose first member is a value compatible with " << refTypeName << "\");" << std::endl;
+
+					ss << indent(n + 1) << "static_assert(" << objectCond << ", \"Session constructor " << f->name << " for " << s.name
+						<< " session must return a pair whose second member is a pointer-like object to a CRTP subclass of "  << sObj << "\");" << std::endl;
 
 					ss << indent(n + 1) << provideLine("CtorWithRetval", symName, defName, f->args, {exportsExtra, acceptExtra});
 				}
