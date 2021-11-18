@@ -47,7 +47,7 @@ struct TypeAliasGenerator
 	}
 
 	static inline void handleItem(std::vector<std::string> &r, const std::string pName, const Contract::Alias &a, const int n) {
-		r.push_back(alias(pName, a.name, n));
+		r.push_back(alias(pName, userTypeName(a.name), n));
 	}
 
 	static inline void handleItem(std::vector<std::string> &r, const std::string pName, const Contract::Function &f, const int n) {

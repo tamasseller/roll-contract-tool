@@ -31,24 +31,18 @@ std::string CodeGenCpp::generate(const std::vector<Contract>& cs, const std::str
 	ss << "#ifndef " << guardMacroName << std::endl;
 	ss << "#define " << guardMacroName << std::endl << std::endl;
 
-	ss << "#include \"RpcCall.h\"" << std::endl;
+	ss << "#include \"base/Call.h\"" << std::endl;
+	ss << "#include \"base/Symbol.h\"" << std::endl << std::endl;
 
-	if(doClient)
-	{
-		ss << "#include \"RpcClient.h\"" << std::endl;
-	}
+	ss << "#include \"types/Collection.h\"" << std::endl;
+	ss << "#include \"types/StructTypeInfo.h\"" << std::endl << std::endl;
 
-	ss << "#include \"RpcStruct.h\"" << std::endl;
-	ss << "#include \"RpcSymbol.h\"" << std::endl;
-	ss << "#include \"RpcSession.h\"" << std::endl;
+	ss << "#include \"framework/Session.h\"" << std::endl;
 
-	if(doService)
-	{
-		ss << "#include \"RpcService.h\"" << std::endl;
-	}
+	if(doClient) ss << "#include \"framework/Client.h\"" << std::endl;
+	if(doService) ss << "#include \"framework/Service.h\"" << std::endl;
 
-	ss << "#include \"RpcTypeInfo.h\"" << std::endl << std::endl;
-	ss << "#include \"RpcCollection.h\"" << std::endl;
+	ss << std::endl;
 
 	for(const auto& c: cs)
 	{
