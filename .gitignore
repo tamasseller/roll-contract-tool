@@ -4,3 +4,4 @@
 .gen
 .o
 roll-contract-tool
+!bash-completion/completions/roll-contract-tool

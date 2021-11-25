@@ -1,6 +1,8 @@
 OUTPUT = roll-contract-tool
 DEPL_BIN += $(OUTPUT)
 
+DEPL_SHARE += bash-completion
+ 
 OBJDIR = .o
 
 SOURCES += main.cpp
