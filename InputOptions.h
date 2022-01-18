@@ -1,6 +1,8 @@
 #ifndef RPC_TOOL_INPUTOPTIONS_H_
 #define RPC_TOOL_INPUTOPTIONS_H_
 
+#include "PathArguments.h"
+
 #include <iostream>
 #include <fstream>
 
@@ -14,11 +16,11 @@ public:
 	template<class Host>
 	void add(Host* h)
 	{
-		h->addOptions({"-i", "--input"}, "Set input file", [this](const std::string &str)
+		h->addOptions({"-i", "--input"}, "Set input file [default: standard input]", [this](const FilePath &p)
 		{
-			if(!(this->inputFile = std::ifstream(str, std::ios::binary)))
+			if(!(this->inputFile = std::ifstream(p, std::ios::binary)))
 			{
-				throw std::runtime_error("Input file '" + str + "' could not be opened [default: standard input]");
+				throw std::runtime_error("Input file '" + std::filesystem::absolute(p).string() + "' could not be opened");
 			}
 			else
 			{
